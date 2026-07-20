@@ -1,0 +1,393 @@
+<html>
+<div id="app">
+	<canvas id="game"></canvas>
+</div>
+</html>
+
+<script>
+class Game{
+	constructor(fps){
+		this.fps=fps
+		this.squares=[];
+		this.canvas = document.querySelector('#game');
+		this.context = this.canvas.getContext("2d");
+		this.canvas.height = window.innerHeight-25;
+		this.canvas.width = window.innerWidth-10;
+		this.addRate = 1000 / 1;
+		this.threads = {};
+		this.numLanes = 5;
+		this.numObjects = 6;
+		this.level = new Level(this.canvas.width, this.canvas.height, this.numLanes, this.numObjects);
+		this.character = new Character(this.canvas.width/2, this.canvas.height - (this.level.laneHeight/4), this.canvas.width, this.canvas.height, this.level.laneHeight/2, (this.level.laneHeight/4) - 10);
+		this.scoreboard = new Scoreboard(0, 3, this.canvas.width, this.canvas.height);
+
+	}
+	
+	clearAndRedraw(){
+		//Level
+		this.checkIfDead();
+		this.checkIfLevelComplete();
+		this.nextFrame();
+		this.level.draw(this.context);
+		//character
+		this.character.draw(this.context);
+		//score
+		this.scoreboard.draw(this.context);
+	}
+	
+	setupControls(){
+		document.onkeydown = () => {this.checkKey()};
+	}
+	
+	checkIfLevelComplete(){
+		if(this.character.y + this.character.radius < 200){
+			this.scoreboard.level++;
+			this.level = new Level(this.canvas.width, this.canvas.height, this.numLanes, this.numObjects++);
+			this.character.reset()
+		}
+	}
+	
+	checkIfDead(){
+		if(this.scoreboard.lives == 0){
+			this.scoreboard.endGame();
+			this.stop(); 
+		}
+	}
+	
+	detectCollisions(character){
+		for(var object of this.level.objects){
+			if(object.collisionDetected(character) && object.visible){
+				object.visible = false;
+				this.scoreboard.score += object.points
+			}
+		}
+		
+		for(var car of this.level.lanes.flatMap(({cars}) => cars)){
+			if(car.collisionDetected(character)){
+				this.scoreboard.lives--;
+				this.character.reset();
+			}
+		}
+	}
+	
+	nextFrame(){
+		this.detectCollisions(this.character)
+		for(var lane of this.level.lanes){
+			lane.moveCars();
+		}
+	}
+	
+	checkKey(e) {
+		e = e || window.event;
+
+		if (e.keyCode == '38') {
+        // up arrow
+		this.character.moveUp();
+		}
+		else if (e.keyCode == '40') {
+        // down arrow
+		this.character.moveDown();
+		}
+		else if (e.keyCode == '37') {
+       // left arrow
+			this.character.moveLeft();
+		}
+		else if (e.keyCode == '39') {
+       // right arrow
+			this.character.moveRight();
+		}
+	}
+	
+	start(){
+		this.setupControls();
+		this.clearAndRedraw();
+		this.threads["clearAndRedraw"] = setInterval(this.clearAndRedraw.bind(this), 1000 / this.fps)
+	}
+	
+	stop(){
+		clearInterval(this.threads["addSquare"]);
+		clearInterval(this.threads["clearAndRedraw"]);
+	}
+}
+
+class Car{
+	constructor(x, y, width, height, type){
+		this.x = x;
+		this.y = y;
+		this.height=width;
+		this.width=height;
+		this.type = type;
+		this.color = this.randomColor();
+		this.speed = 10;
+	}
+	
+	randomColor(){
+		let r = Math.round(Math.random() * 255);
+		let g = Math.round(Math.random() * 255);
+		let b = Math.round(Math.random() * 255);
+		return `rgb( ${r}, ${g}, ${b} )`
+	}
+	
+	collisionDetected(character){
+		var charMaxX = character.x + character.radius;
+		var charMaxY = character.y + character.radius;
+		var charMinX = character.x - character.radius;
+		var charMinY = character.y - character.radius;
+		
+		if(
+			(this.x < charMaxX && this.y < charMaxY && this.x > charMinX && this.y > charMinY)
+		||  (this.x + this.width > charMinX && this.y < charMaxY && this.x + this.width < charMaxX && this.y > charMinY)
+		){
+			return true;
+		}else{
+			return false;
+		}	
+	}
+	
+	draw(context){
+		context.fillStyle = this.color;
+		context.fillRect(this.x, this.y, this.width, this.height)
+	}
+}
+
+class Character{
+	constructor(x, y, maxX, maxY, speed, radius){
+		this.x = x;
+		this.y = y;
+		this.color = "green"
+		this.startPosX = x;
+		this.startPosY = y;
+		this.radius = radius;
+		this.maxX = maxX;
+		this.maxY = maxY;
+		this.speed = speed;
+	}
+	
+	moveLeft(){
+		var amount = this.speed;
+		if(this.x - amount > 0){
+			this.x -= amount;
+		}
+	}
+	
+	moveRight(){
+		var amount = this.speed;
+		if(this.x + amount < this.maxX ){
+			this.x += amount;
+		}
+	}
+	
+	moveUp(){
+		var amount = this.speed;
+		if(this.y - amount > 0){
+			this.y -= amount;
+		}
+	}
+	
+	moveDown(){
+		var amount = this.speed;
+		if(this.y + amount < this.maxY){
+			this.y += amount;
+		}
+	}
+	
+	reset(){
+		this.x = this.startPosX;
+		this.y = this.startPosY;
+	}
+	
+	draw(context){
+		context.beginPath();
+		context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+		context.fillStyle = this.color
+		context.fill();
+	}
+}
+
+class Lane{
+	constructor(offset, width, height){
+		this.type = Math.random() > .5 ? "Left" : "Right" 
+		this.offset = offset
+		this.width = width;
+		this.height = height;
+		this.roadColor = "#333333";
+		this.grassColor = "#00aa00";
+		this.numCars = Math.round(Math.random() * 5);
+		this.cars = this.addCars();
+	}
+	
+	addCars(){
+		var cars = [];
+		for(var i = 0; i < this.numCars; i++){
+			var spacing = (i * (this.width / this.numCars));
+			var x = this.type == "Left" ? 0 + spacing  : this.width - spacing;
+			var y = this.offset + (this.height * .125);
+			var car = new Car(x, y, this.height * .25, this.height, this.type)
+			cars.push(car);
+		}
+		
+		return cars;
+	}
+	
+	moveCars(){
+		for(var car of this.cars){
+			switch(this.type){
+				case "Left":
+					car.x = (car.x - car.speed) > (0 - car.width) ? car.x - car.speed : this.width;
+					break;
+				case "Right":
+					car.x = (car.x + car.speed) < this.width ? car.x + car.speed : -car.width;
+					break;
+			}
+		}
+	}
+	
+	draw(context){
+		context.fillStyle = this.roadColor;
+		context.fillRect(0, this.offset, this.width, this.height/2);
+		context.fillStyle = this.grassColor;
+		context.fillRect(0, this.offset + (this.height /2), this.width, this.height/2);
+		for(var car of this.cars){
+			car.draw(context);
+		}
+	}
+}
+
+class Object{
+	constructor(minX, minY, maxX, maxY){
+		this.minX = minX;
+		this.minY = minY;
+		this.maxX = maxX;
+		this.maxY = maxY;
+		this.radius = 10;
+		this.visible = true;
+		this.x = this.minX + (Math.random() * (this.maxX - this.minX));
+		this.y = this.minY + (Math.random() * (this.maxY - this.minY));
+		this.points = Math.round(Math.random() * 1000);
+	}
+	
+	collisionDetected(character){
+		var charMaxX = character.x + character.radius + this.radius;
+		var charMaxY = character.y + character.radius + this.radius;
+		var charMinX = character.x - character.radius - this.radius;
+		var charMinY = character.y - character.radius - this.radius;
+		if(this.x < charMaxX && this.x > charMinX && this.y > charMinY && this.y < charMaxY){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	draw(context){
+		if(this.visible){
+			context.beginPath();
+			context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+			context.fillStyle = "yellow";
+			context.fill();
+		}
+	}
+}
+
+class Level{
+	constructor(width, height, laneCount, objectCount){
+		this.height = height;
+		this.width = width;
+		this.laneCount = laneCount;
+		this.laneHeight = 0;
+		this.laneWidth = 0;
+		this.objectCount = objectCount;
+		this.safeSpaceHeight = 200;
+		this.objects = this.buildObjects();
+		this.lanes = this.buildLanes();
+	}
+	
+	buildLanes(){
+		var lanes = [];
+		this.laneHeight = (this.height - this.safeSpaceHeight) / this.laneCount;
+		this.laneWidth = this.width;
+		for(var i=0; i < this.laneCount; i++){
+			var offset = (i * this.laneHeight) + this.safeSpaceHeight; 
+			var lane = new Lane(offset, this.laneWidth, this.laneHeight);
+			lanes.push(lane);
+		}
+		
+		return lanes
+	}
+	
+	buildObjects(){
+		var objects = [];
+		for(var i=0; i < this.objectCount; i++){
+			var object = new Object(0, this.safeSpaceHeight, this.width, this.height);
+			objects.push(object);
+		}
+		
+		return objects;
+	}
+	
+	draw(context){
+		//safeSpace
+		context.fillStyle = "deepskyblue";
+		context.fillRect(0, 0, this.width, this.safeSpaceHeight);
+	
+		for(var lane of this.lanes){
+			lane.draw(context);
+		}
+		
+		for(var object of this.objects){
+			object.draw(context);
+		}
+	}
+}
+
+class Scoreboard{
+	constructor(score, lives, width, height){
+		this.width = width;
+		this.height = height;
+		this.score = score;
+		this.lives = lives;
+		this.highscores=[];
+		this.level = 1;
+		this.color = "#000000";
+	}
+	
+	endGame(){
+		this.highscores = JSON.parse(localStorage.getItem("highscores"));
+		if(this.highscores){
+			this.highscores.push(this.score);
+			this.highscores.sort((a,b) => b-a);
+			this.highscores = this.highscores.splice(0,5);
+		}else{
+			this.highscores = [];
+			this.highscores.push(this.score);
+		}
+		localStorage.setItem("highscores", JSON.stringify(this.highscores));
+	}
+	
+	draw(context){
+		context.fillStyle = this.color;
+		context.font = "24px serif";
+		context.textAlign = "left";
+		context.fillText("LEVEL: " + this.level + "		SCORE: " + this.score + "		LIVES: " + this.lives, 50, 50);
+		
+		if(this.lives == 0){
+			var gameOverFont = 48;
+			var scoreFont = 32;
+			context.fillStyle = "Red";
+			context.font = gameOverFont + "px serif";
+			context.textAlign = "center";
+			context.fillText("GAME OVER", this.width/2, this.height/3);
+			context.font = scoreFont + "px serif";
+			context.fillText("Score: " + this.score, this.width/2, gameOverFont + (this.height/3));
+			
+			for(var i = 0; i < this.highscores.length; i++){
+				context.textAlign = "center";
+				context.fillText(i + 1 + ":		" + this.highscores[i], this.width/2, gameOverFont + (this.height/3) + scoreFont + (scoreFont * i));
+			}
+		}
+	}
+}
+
+game = new Game(60);
+game.start();
+
+</script>
