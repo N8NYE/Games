@@ -285,125 +285,15 @@ namespace SockerGame.Core.Systems
             }
         }
 
+        /// <summary>
+        /// Updated AI player using the AIStrategy class for tactical behavior
+        /// </summary>
         public void UpdateAIPlayer(Player player, float dt, Team team)
         {
-            float baseSpeed = 80f + (player.Stats.Speed / 100f) * 120f;
-            float staminaMod = 0.5f + (player.Stats.Stamina / 100f) * 0.5f;
-            baseSpeed *= staminaMod;
-            float aggression = player.Stats.Aggression / 100f;
-
-            float targetX = player.X;
-            float targetY = player.Y;
-
-            if (player.HasBall)
-            {
-                float goalX = player.Team == TeamSide.Home ? PitchDimensions.Width : 0;
-                float goalY = PitchDimensions.CenterY;
-                targetX = goalX;
-                targetY = goalY + (float)(_random.NextDouble() - 0.5) * 100f;
-
-                foreach (var (_, others) in _match.TeamPlayers)
-                {
-                    foreach (var teammate in others)
-                    {
-                        if (teammate.Id == player.Id || teammate.Team != player.Team) continue;
-                        float tdx = teammate.X - player.X;
-                        float tdy = teammate.Y - player.Y;
-                        float tdist = MathF.Sqrt(tdx * tdx + tdy * tdy);
-
-                        if (tdist > 50 && tdist < 300 && _random.NextDouble() < 0.02)
-                        {
-                            PerformAIPass(player, teammate);
-                            return;
-                        }
-                    }
-                }
-
-                if ((player.Team == TeamSide.Home && player.X > PitchDimensions.Width - 150) ||
-                    (player.Team == TeamSide.Away && player.X < 150))
-                {
-                    if (_random.NextDouble() < 0.1) PerformAIShot(player);
-                }
-            }
-            else
-            {
-                var formationPosition = GetFormationPosition(player, team);
-                targetX = formationPosition.Item1;
-                targetY = formationPosition.Item2;
-
-                float ballDist = MathF.Sqrt(MathF.Pow(_match.Ball.X - player.X, 2) + MathF.Pow(_match.Ball.Y - player.Y, 2));
-                if (ballDist < 150 * (1f - aggression * 0.5f))
-                {
-                    targetX = _match.Ball.X;
-                    targetY = _match.Ball.Y;
-                }
-            }
-
-            float dx = targetX - player.X;
-            float dy = targetY - player.Y;
-            float dist = MathF.Sqrt(dx * dx + dy * dy);
-
-            if (dist > 5)
-            {
-                player.Direction = MathF.Atan2(dy, dx);
-                player.Speed = MathF.Min(baseSpeed, dist / 0.1f);
-                player.TargetX = player.X + MathF.Cos(player.Direction) * player.Speed * dt;
-                player.TargetY = player.Y + MathF.Sin(player.Direction) * player.Speed * dt;
-            }
-            else
-            {
-                player.Speed = 0;
-            }
+            // Use the new AIStrategy system for better tactical behavior
+            AIStrategy.UpdateAIPlayer(player, dt, _match, _teams, _match.TeamPlayers);
         }
 
-        private void PerformAIPass(Player passer, Player receiver)
-        {
-            float power = (passer.Stats.Passing / 100f) * 400f;
-            float dx = receiver.X - passer.X;
-            float dy = receiver.Y - passer.Y;
-            float dist = MathF.Sqrt(dx * dx + dy * dy);
-
-            if (dist > 0)
-            {
-                _match.Ball.VelocityX = (dx / dist) * power;
-                _match.Ball.VelocityY = (dy / dist) * power;
-                _match.Ball.Speed = power;
-                _match.Ball.LastTouchedBy = passer;
-                _match.Ball.IsAerial = false;
-                _match.Ball.ZPosition = 0;
-                _match.Ball.VisualScale = 1.0f;
-                passer.HasBall = false;
-            }
-        }
-
-        private void PerformAIShot(Player shooter)
-        {
-            float power = (shooter.Stats.ShotStrength / 100f) * 600f;
-            float accuracy = shooter.Stats.Accuracy / 100f;
-
-            float goalY = PitchDimensions.CenterY + (float)(_random.NextDouble() - 0.5) * PitchDimensions.GoalWidth * 0.5f;
-            float goalX = shooter.Team == TeamSide.Home ? PitchDimensions.Width : 0;
-
-            float dx = goalX - shooter.X;
-            float dy = goalY - shooter.Y;
-            float dist = MathF.Sqrt(dx * dx + dy * dy);
-
-            if (dist > 0)
-            {
-                float angle = MathF.Atan2(dy, dx);
-                float angleVariation = (1f - accuracy) * 0.2f;
-                angle += (float)(_random.NextDouble() - 0.5) * angleVariation;
-
-                _match.Ball.VelocityX = MathF.Cos(angle) * power;
-                _match.Ball.VelocityY = MathF.Sin(angle) * power;
-                _match.Ball.Speed = power;
-                _match.Ball.LastTouchedBy = shooter;
-                _match.Ball.IsAerial = false;
-                _match.Ball.ZPosition = 0;
-                _match.Ball.VisualScale = 1.0f;
-                shooter.HasBall = false;
-            }
-        }
 
         private (float, float) GetFormationPosition(Player player, Team team)
         {
@@ -417,26 +307,32 @@ namespace SockerGame.Core.Systems
 
             if (player.Position == PlayerPosition.Goalkeeper)
             {
+                // Goalkeeper on goal line
                 float gkX = team.Side == TeamSide.Home ? 30f : PitchDimensions.Width - 30f;
                 return (gkX, PitchDimensions.CenterY);
             }
 
             if (player.Position == PlayerPosition.Defender)
             {
-                float defX = team.Side == TeamSide.Home ? PitchDimensions.Width * 0.25f : PitchDimensions.Width * 0.75f;
+                // Home defenders: X around 20% of field width (on home side, defending left goal)
+                // Away defenders: X around 80% of field width (on away side, defending right goal)
+                float defX = team.Side == TeamSide.Home ? PitchDimensions.Width * 0.2f : PitchDimensions.Width * 0.8f;
                 float spread = count > 1 ? (index - (count - 1) / 2f) * (PitchDimensions.Height * 0.35f / Math.Max(1, count - 1)) : 0;
                 return (defX, PitchDimensions.CenterY + spread);
             }
 
             if (player.Position == PlayerPosition.Midfielder)
             {
-                float midX = PitchDimensions.CenterX;
+                // Central midfield - positioned to support both defense and attack
+                float midX = team.Side == TeamSide.Home ? PitchDimensions.Width * 0.45f : PitchDimensions.Width * 0.55f;
                 float spread = count > 1 ? (index - (count - 1) / 2f) * (PitchDimensions.Height * 0.45f / Math.Max(1, count - 1)) : 0;
                 return (midX, PitchDimensions.CenterY + spread);
             }
 
             if (player.Position == PlayerPosition.Forward)
             {
+                // Home forwards: attacking right side (toward away goal at right)
+                // Away forwards: attacking left side (toward home goal at left)
                 float fwdX = team.Side == TeamSide.Home ? PitchDimensions.Width * 0.7f : PitchDimensions.Width * 0.3f;
                 float spread = count > 1 ? (index - (count - 1) / 2f) * (PitchDimensions.Height * 0.35f / Math.Max(1, count - 1)) : 0;
                 return (fwdX, PitchDimensions.CenterY + spread);

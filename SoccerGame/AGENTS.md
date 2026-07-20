@@ -138,3 +138,7 @@
 - There should always be 11 v 11.  Any NPC should have ai movement.  The ai should play their position and work with other players to pass the ball.  
 - The game should be full screen.  The score should be located in the upper right corner.  The box displaying the score should look similar to how they do it in world cup, where the team's uniform color matches the background of the team's name listed.  The scores for each team should be in the box next to the team's name.  Substitutes should be placed around a team bench that is located just off the bottom of the field.  The field and gameplay should be left to right.
 - Players should always have the ability to walk around the field using WASD controls.
+
+## Helpful links
+- rules of the game: https://digitalhub.fifa.com/m/5371a6dcc42fbb44/original/d6g1medsi8jrrd3e4imp-pdf.pdf
+- tactics https://en.wikipedia.org/wiki/Association_football_tactics
