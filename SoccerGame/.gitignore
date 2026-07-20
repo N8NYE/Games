@@ -1,0 +1,58 @@
+# C# build artifacts
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.prefs
+
+# NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Build output
+*.dll
+*.exe
+*.exe.config
+*.mix
+*.idb
+*.pdb
+*.app
+*.msi
+*.emit
+
+# .NET
+*.dotnet
+*.net*/
+*.nupkg
+*.snupkg
+
+# Rider
+.idea/
+*.DotSettings
+
+# Code coverage
+*.coveragexml
+coverage/
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# StyleCop
+StyleCop.Cache
+
+# BDOSS.CodeClean
+CodeClean.xml
+
+# Azure DevOps
+*.publish.xml
+
+# ClickOnce
+publish/
