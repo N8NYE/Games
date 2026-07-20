@@ -1,0 +1,188 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {
+      "Raylib-cs/8.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Raylib-cs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Raylib-cs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/linux-x64/native/libraylib.so": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
+          "runtimes/osx-arm64/native/libraylib.dylib": {
+            "assetType": "native",
+            "rid": "osx-arm64"
+          },
+          "runtimes/osx-x64/native/libraylib.dylib": {
+            "assetType": "native",
+            "rid": "osx-x64"
+          },
+          "runtimes/win-x64/native/raylib.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/raylib.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          }
+        }
+      },
+      "SockerGame.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/SockerGame.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SockerGame.Core.dll": {}
+        }
+      },
+      "SockerGame.Server/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "SockerGame.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/SockerGame.Server.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SockerGame.Server.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Raylib-cs/8.0.0": {
+      "sha512": "m+fStTZjOGtkx05RNflERtKbmEUrIZ5/PFV5QXnlA02kAEwxxOC+XhNeCSZJhaGHu9d8m0eTMmefRhHueS3hkg==",
+      "type": "package",
+      "path": "raylib-cs/8.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net10.0/Raylib-cs.dll",
+        "lib/net10.0/Raylib-cs.xml",
+        "lib/net8.0/Raylib-cs.dll",
+        "lib/net8.0/Raylib-cs.xml",
+        "raylib-cs.8.0.0.nupkg.sha512",
+        "raylib-cs.nuspec",
+        "raylib-cs_64x64.png",
+        "runtimes/linux-x64/native/libraylib.so",
+        "runtimes/osx-arm64/native/libraylib.dylib",
+        "runtimes/osx-x64/native/libraylib.dylib",
+        "runtimes/win-x64/native/raylib.dll",
+        "runtimes/win-x86/native/raylib.dll"
+      ]
+    },
+    "SockerGame.Core/1.0.0": {
+      "type": "project",
+      "path": "../SockerGame.Core/SockerGame.Core.csproj",
+      "msbuildProject": "../SockerGame.Core/SockerGame.Core.csproj"
+    },
+    "SockerGame.Server/1.0.0": {
+      "type": "project",
+      "path": "../SockerGame.Server/SockerGame.Server.csproj",
+      "msbuildProject": "../SockerGame.Server/SockerGame.Server.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "Raylib-cs >= 8.0.0",
+      "SockerGame.Core >= 1.0.0",
+      "SockerGame.Server >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\natha\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\Programming\\Web\\SoccerGame\\SockerGame.Client\\SockerGame.Client.csproj",
+      "projectName": "SockerGame.Client",
+      "projectPath": "D:\\Programming\\Web\\SoccerGame\\SockerGame.Client\\SockerGame.Client.csproj",
+      "packagesPath": "C:\\Users\\natha\\.nuget\\packages\\",
+      "outputPath": "D:\\Programming\\Web\\SoccerGame\\SockerGame.Client\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\natha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {
+            "D:\\Programming\\Web\\SoccerGame\\SockerGame.Core\\SockerGame.Core.csproj": {
+              "projectPath": "D:\\Programming\\Web\\SoccerGame\\SockerGame.Core\\SockerGame.Core.csproj"
+            },
+            "D:\\Programming\\Web\\SoccerGame\\SockerGame.Server\\SockerGame.Server.csproj": {
+              "projectPath": "D:\\Programming\\Web\\SoccerGame\\SockerGame.Server\\SockerGame.Server.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "all"
+      },
+      "SdkAnalysisLevel": "9.0.100"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "dependencies": {
+          "Raylib-cs": {
+            "target": "Package",
+            "version": "[8.0.0, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

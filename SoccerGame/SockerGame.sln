@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockerGame.Client", "SockerGame.Client\SockerGame.Client.csproj", "{DE321186-A653-4DB4-B823-C279F898EDD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockerGame.Core", "SockerGame.Core\SockerGame.Core.csproj", "{A4F0D36E-4C5C-4C7E-A09D-1429737A46EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SockerGame.Server", "SockerGame.Server\SockerGame.Server.csproj", "{5458AB1B-EAAB-4A88-AD86-D2EC353F05DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE321186-A653-4DB4-B823-C279F898EDD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE321186-A653-4DB4-B823-C279F898EDD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE321186-A653-4DB4-B823-C279F898EDD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE321186-A653-4DB4-B823-C279F898EDD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4F0D36E-4C5C-4C7E-A09D-1429737A46EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4F0D36E-4C5C-4C7E-A09D-1429737A46EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4F0D36E-4C5C-4C7E-A09D-1429737A46EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4F0D36E-4C5C-4C7E-A09D-1429737A46EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5458AB1B-EAAB-4A88-AD86-D2EC353F05DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5458AB1B-EAAB-4A88-AD86-D2EC353F05DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5458AB1B-EAAB-4A88-AD86-D2EC353F05DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5458AB1B-EAAB-4A88-AD86-D2EC353F05DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

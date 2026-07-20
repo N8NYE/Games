@@ -1,0 +1,15 @@
+D:\Programming\Web\SoccerGame\SockerGame.Server\bin\Release\net9.0\SockerGame.Server.deps.json
+D:\Programming\Web\SoccerGame\SockerGame.Server\bin\Release\net9.0\SockerGame.Server.dll
+D:\Programming\Web\SoccerGame\SockerGame.Server\bin\Release\net9.0\SockerGame.Server.pdb
+D:\Programming\Web\SoccerGame\SockerGame.Server\bin\Release\net9.0\SockerGame.Core.dll
+D:\Programming\Web\SoccerGame\SockerGame.Server\bin\Release\net9.0\SockerGame.Core.pdb
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.csproj.AssemblyReference.cache
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.AssemblyInfoInputs.cache
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.AssemblyInfo.cs
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.csproj.CoreCompileInputs.cache
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGa.A764D054.Up2Date
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.dll
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\refint\SockerGame.Server.dll
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\SockerGame.Server.pdb
+D:\Programming\Web\SoccerGame\SockerGame.Server\obj\Release\net9.0\ref\SockerGame.Server.dll
