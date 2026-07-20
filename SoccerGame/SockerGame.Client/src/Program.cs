@@ -4,7 +4,6 @@ using SockerGame.Core.Models;
 using SockerGame.Core.Systems;
 using SockerGame.Server;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
@@ -72,13 +71,6 @@ float _statRepeatDelay = 0.3f; // initial delay before repeat starts
 float _statRepeatRate = 0.08f; // repeat rate after initial delay
 float _kickInputDelay = 0f; // prevents click-through on game start
 int _pendingAiTeam = 0; // which team to add AI to (0=home, 1=away)
-
-[DllImport("user32.dll")]
-static extern bool OpenClipboard(IntPtr hWndNewOwner);
-[DllImport("user32.dll")]
-static extern bool CloseClipboard();
-[DllImport("user32.dll")]
-static extern bool SetClipboardData(uint uFormat, IntPtr data);
 
 Raylib.InitWindow(ScreenWidth, ScreenHeight, GameTitle);
 Raylib.SetTargetFPS(60);

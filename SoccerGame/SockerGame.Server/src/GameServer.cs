@@ -733,24 +733,4 @@ namespace SockerGame.Server
         }
     }
 
-    // Data classes for serialization
-    public class JoinLobbyData
-    {
-        public string Username { get; set; } = "";
-        public string Password { get; set; } = "";
-    }
-
-    public class JerseyUpdateData
-    {
-        public string TeamId { get; set; } = "";
-        public string PrimaryColor { get; set; } = "#FF0000";
-        public string SecondaryColor { get; set; } = "#FFFFFF";
-        public int[,]? PixelArt { get; set; }
-    }
-
-    public class SubstitutionData
-    {
-        public string PlayerOffId { get; set; } = "";
-        public string PlayerOnId { get; set; } = "";
-    }
 }

@@ -1,144 +1,230 @@
 # AGENTS.md
 
 ## Project Overview
-- Project name: Socker
-- Genre: Sports
-- Target platform: Desktop
-- Current phase:
-- Core play loop:
+- **Project name:** Socker (SockerGame)
+- **Genre:** Sports (Soccer/Association Football)
+- **Target platform:** Cross-platform Desktop (Windows, Linux, macOS)
+- **Current phase:** Active Development
+- **Core play loop:** Host/join lobby → Customize team/appearance/stats → Start match → Play 11v11 soccer → Score goals → Win
 
 ## Primary Goals
-- Deliver a fun and polished player experience.
-- Keep the codebase maintainable and extensible.
-- Optimize for performance and stability.
-- Make gameplay systems easy to iterate on.
+- Deliver a fun and polished player experience with authentic soccer gameplay
+- Keep the codebase maintainable and extensible with clear separation of concerns
+- Optimize for performance and stability with 60 FPS target
+- Make gameplay systems easy to iterate on with data-driven design
+- Support up to 30 players per lobby with P2P hosting model
 
 ## Tech Stack
-- Engine:
-- Language: C#
-- Frameworks/libraries:
-- Package manager:
-- Asset pipeline:
-- Testing tools:
-- Should be docker containerized.
+- **Language:** C# (.NET 9.0)
+- **Rendering:** Raylib-cs 8.0 (top-down 2D graphics)
+- **Networking:** TCP sockets with JSON serialization (no external networking library)
+- **Package manager:** NuGet
+- **Build system:** MSBuild / dotnet CLI
+- **Container:** Docker support planned but not yet implemented
 
 ## Project Structure
-- src/ or scripts/ - gameplay logic
-- entities/ - game objects and actors
-- systems/ - core systems such as input, UI, audio, save/load
-- data/ - config, balance data, JSON, definitions
-- assets/ - art, audio, levels, prefabs
-- tests/ - automated tests
-- docs/ - design notes, architecture notes, production docs
+```
+SockerGame/
+├── SockerGame.Client/          # Main executable, rendering, input handling
+│   ├── src/
+│   │   └── Program.cs          # Game loop, UI, drawing
+│   ├── assets/
+│   │   └── icon.ico
+│   └── SockerGame.Client.csproj
+├── SockerGame.Core/            # Shared models, enums, systems
+│   └── src/
+│       ├── Enums/
+│       │   └── GameEnums.cs    # GamePhase, PlayerPosition, TeamSide, KickDirection, ConnectionState, MatchEventType
+│       ├── Models/
+│       │   ├── GameState.cs      # Root game state container
+│       │   ├── MatchState.cs     # Match state (scores, time, ball, players)
+│       │   ├── Ball.cs           # Ball physics and state
+│       │   ├── LobbyState.cs     # Lobby information
+│       │   ├── Player.cs         # Player data (position, stats, appearance)
+│       │   ├── PlayerStats.cs    # Player statistics system
+│       │   ├── PlayerAppearance.cs # Player appearance customization
+│       │   ├── Team.cs           # Team data structure
+│       │   ├── JerseyDesign.cs   # Jersey pixel art design
+│       │   ├── MatchEvent.cs     # Match event record for history
+│       │   ├── NetworkMessage.cs # Network message wrapper
+│       │   ├── NetworkMessageType.cs # Network message type enum
+│       │   ├── InputState.cs     # Player input state
+│       │   └── PitchDimensions.cs # Pitch constants and measurements
+│       └── Systems/
+│           ├── MatchEngine.cs    # Core match simulation, physics, rules
+│           └── AIStrategy.cs     # Tactical AI behavior (no rendering dependencies)
+├── SockerGame.Server/          # Server logic, networking
+│   └── src/
+│       ├── GameServer.cs         # TCP server, lobby management, broadcasting
+│       ├── JoinLobbyData.cs      # Join lobby message data
+│       ├── JerseyUpdateData.cs   # Jersey update message data
+│       └── SubstitutionData.cs   # Substitution message data
+├── docs/
+│   └── AIStrategyRedesign.md     # AI technical documentation
+└── SockerGame.sln              # Visual Studio solution
+```
 
 ## Development Principles
-- Prefer simple, readable systems over clever abstractions.
-- Keep gameplay logic data-driven where possible.
-- Avoid hard-coded values; use config files or constants.
-- Separate gameplay rules from presentation and UI.
-- Favor composition over deep inheritance chains.
-- Keep state management explicit and predictable.
-- Make systems easy to debug and inspect.
+- Prefer simple, readable systems over clever abstractions
+- Keep gameplay logic data-driven where possible
+- Avoid hard-coded values; use constants defined in PitchDimensions class
+- Separate gameplay rules from presentation and UI
+- Favor composition over deep inheritance chains
+- Keep state management explicit and predictable
+- Make systems easy to debug and inspect
+- **One class per file** for better organization and maintainability
 
 ## Game Design Rules
-- Every feature should support the core loop.
-- Reuse systems instead of duplicating logic.
-- Keep controls intuitive and consistent.
-- Maintain clear win/loss/level progression rules.
-- Prioritize player feedback for actions, collisions, damage, and rewards.
-- Avoid adding features that do not improve gameplay or polish.
+- Every feature should support the core soccer loop
+- Reuse systems instead of duplicating logic
+- Keep controls intuitive and consistent (WASD + Mouse)
+- Maintain authentic FIFA rules: offside, throw-ins, goal kicks, substitutions
+- Prioritize player feedback for actions, collisions, and goals
+- Avoid adding features that do not improve gameplay or polish
 
 ## Architecture Guidance
-- Use a clear separation between:
-  - game state
-  - gameplay systems: keep libraries to a minimum.  Try to write any engine or key game components yourself to minimize reliance on other technology outside of the core language
-  - UI
-  - input
-  - persistence
-  - rendering/audio
-- Keep dependencies directional and minimal.
-- Use events, interfaces, or component-based patterns where appropriate.
-- Avoid tightly coupling gameplay code to rendering code.
+Three distinct layers with minimal dependencies:
+
+### Client Layer (`SockerGame.Client`)
+- Rendering: Raylib drawing calls, camera management
+- UI: Menus, dialogs, HUD, customization screens
+- Input: Keyboard/mouse handling, input buffering
+- Network client: TCP connection to host
+
+### Core Layer (`SockerGame.Core`)
+- **Models:** All serializable data structures (one class per file)
+- **MatchEngine:** Core simulation, ball physics, collision, rules
+- **AIStrategy:** Tactical AI behavior (no rendering dependencies)
+- Pure logic that can run on host or be used for prediction
+
+### Server Layer (`SockerGame.Server`)
+- TCP lobby server, handles up to 30 connections
+- Lobby management, player auth, jersey/team assignment
+- Broadcasts state updates to all clients
+- Runs match simulation when game starts
 
 ## Coding Standards
-- Use descriptive names for systems, scripts, and variables.
-- Keep functions focused and small.
-- Add comments only where intent is unclear.
-- Prefer type safety and validation.
-- Handle edge cases gracefully.
-- Log errors clearly and avoid silent failures.
+- Use descriptive names for systems, scripts, and variables
+- Keep functions focused and small (under 50 lines where possible)
+- Add comments only where intent is unclear (AIStrategy well-documented)
+- Prefer type safety with nullable reference types enabled
+- Handle edge cases gracefully (check for null team/player)
+- Log errors clearly via OnLog event
+- **One public class per file** - each .cs file contains a single public type
+
+## Controls Reference
+| Key | Action |
+|-----|--------|
+| WASD | Move player |
+| Mouse | Aim direction (player faces cursor) |
+| Left Click (hold) | Charge ground kick (shoot/pass) |
+| Right Click (hold) | Charge aerial kick (header/bicycle kick effect) |
+| Shift | Sprint (with aggression risk on tackle) |
+| Space | Slide tackle |
+| Enter | Toggle text chat |
+| Page Up/Down | Increase/decrease team voice volume |
+| Home/End | Increase/decrease opponent voice volume |
+| F11 | Toggle fullscreen |
+| Escape | Pause menu / Back |
+| U | Open substitution menu (coach only) |
+
+## Player Stats (10 Categories)
+All stats start at **75**, players get **100 points** to distribute:
+1. **Speed** - Movement velocity multiplier
+2. **ShotStrength** - Shooting power (used for shots and passes)
+3. **Passing** - Pass accuracy and power
+4. **Dribbling** - Ball control (affects kick cooldown)
+5. **Defense** - Tackle success rate, marking ability
+6. **Stamina** - Movement speed modifier
+7. **Aggression** - Tackle frequency, card risk, knockdown duration
+8. **Jumping** - Aerial challenge ability (not yet fully implemented)
+9. **Accuracy** - Kick aim precision
+10. **Reflexes** - Goalkeeper save ability (not yet fully implemented)
+
+## Match Rules (FIFA Compliant)
+- **Match duration:** 90 in-game minutes (mapped to 20 real minutes)
+- **Teams:** 11v11 (AI fills missing players)
+- **Substitutes:** 4 per team, coach-managed substitutions
+- **Offside:** Detected when player receives ball past second-last defender
+- **Throw-ins:** Awarded to opposing team when ball crosses goal line
+- **Goal kicks:** Awarded for out-of-bounds on defensive end
+- **Slide tackle:** Knockdown effect, card risk based on aggression
+- **Cards:** Yellow card on aggressive tackles, no second yellow yet
+
+## Architecture Patterns Used
+- **Entity Component:** Player has Stats, Appearance, Position components
+- **State machine:** GamePhase enum manages main menu, lobby, match flow
+- **Event-driven networking:** NetworkMessage types with JSON payloads
+- **Strategy pattern:** AIStrategy separates tactical decisions from simulation
 
 ## Feature Workflow
-1. Define the feature and its player impact.
-2. Add or update the relevant data/config.
-3. Implement gameplay logic.
-4. Connect UI and feedback.
-5. Add testing and validation.
-6. Playtest and refine.
-
-## Testing Expectations
-- Add tests for gameplay rules, state transitions, and data parsing.
-- Validate edge cases and regressions.
-- Test on target platforms whenever possible.
-- Verify that changes do not break save/load or progression.
-
-## Performance Guidelines
-- Keep update loops efficient.
-- Avoid unnecessary allocations during gameplay.
-- Optimize hot paths, especially physics, AI, and rendering.
-- Profile before optimizing.
-- Maintain stable frame rate and memory usage targets.
-
-## Content and Asset Workflow
-- Keep asset naming consistent.
-- Version important assets and level data.
-- Document scene structure and dependencies.
-- Avoid broken references and missing files.
-- Keep content production organized by feature or area.
+1. Define the feature and its player impact
+2. Add or update relevant data/config in appropriate Model file
+3. Implement core logic in MatchEngine.cs or AIStrategy.cs
+4. Connect UI in Program.cs Draw/Update methods
+5. Test with `dotnet run --project SockerGame.Client`
+6. Playtest and refine
 
 ## Build and Run
-- Install dependencies:
-- Run game locally: dotnet run --project SockerGame.Client
-- Use the command dotnet run --project SockerGame.Client when I say "run game"
-- Run tests:
-- Build for target platform:
+```bash
+# Install dependencies (already configured in csproj)
+dotnet restore
+
+# Run game locally
+dotnet run --project SockerGame.Client
+
+# Build for release
+dotnet publish -c Release -r win-x64 --self-contained true
+dotnet publish -c Release -r linux-x64 --self-contained true
+dotnet publish -c Release -r osx-x64 --self-contained true
+
+# Run tests (not yet implemented)
+dotnet test
+```
 
 ## Known Constraints
-- Platform limitations:
-- Performance targets:
-- Scope limits:
-- Known technical debt:
+- **Platform limitations:** Desktop only (no mobile/web)
+- **Performance targets:** 60 FPS at 1280x720 fullscreen
+- **Network model:** P2P hosting (host runs server + simulation)
+- **Physics:** Simplified 2D - no spin, wind, or complex ball trajectory
+- **Voice chat:** UI present but not implemented (stub for future)
+
+## Known Technical Debt
+- AI UpdateGameLoop method in GameServer uses placeholder AI inputs instead of proper AI integration
+- Reflexes stat exists but goalkeeper diving saves not implemented
+- Jumping stat exists but heading mechanics not implemented
+- Corner kicks not implemented (falls back to goal kick logic)
+- No penalty shootout when match ends in draw
+- Chat system is local only (no network broadcast)
+- Voice chat UI exists but no actual voice implementation
 
 ## Priority Order
-1. Core gameplay loop
+1. Core gameplay loop (✓ implemented)
 2. Player feedback and polish
 3. Stability and bug fixing
 4. Content and progression
 5. Performance optimization
-6. Extra features
+6. Extra features (voice chat, animations, advanced tactics)
 
-## Final Reminder
-- Build the game as a complete experience, not just isolated systems.
-- Keep the player experience at the center of every decision.
-- When unsure, choose the simpler and more reliable solution or ask me how to procede if the change is reasonably large and impactful.
+## Helpful Links
+- **FIFA Rules of the Game:** https://digitalhub.fifa.com/m/5371a6dcc42fbb44/original/d6g1medsi8jrrd3e4imp-pdf.pdf
+- **Football Tactics:** https://en.wikipedia.org/wiki/Association_football_tactics
+- **Raylib-cs Docs:** https://github.com/ChrisDill/Raylib-cs
 
-## Game Description and requirements
-- You are building a standalone application that should be supported on all major OS's.  Linux, IOS, Windows.
-- The game is a multi player game and should support one user hosting up to 30 players in a single lobby.
-- The game is a soccer game and should follow all of the same rules as soccer.  Players will be in control of 1 of the 11 players on a team with 2 teams on the field per normal soccer rules.  The time scale will be such that a full match takes only 20 minutes instead of 90.  The time will be displayed such that 90 minutes is used, the time displayed just moves faster.
-- When launching the game, users will be asked to join or host a lobby.  The lobby will have a name and be password protected.  We will not be incharge of any central server, the game should be hosted by a single individual with players able to connect to that user's server.  
-- In the lobby users will be able to generate a jersey, which they can create by drawing on the screen, like pixel art. The players on that team will all share the jersey.  In the lobby players will also claim their positions: defence, midfield, offense, goalie, or substitute. Both team jerseys should be displayed and update as changes are made to them.  Only players assigned x team can modify x jersey.  The team y jersey will be view only. Users will also be able to assign looks to their player, like hair cut, eye color, facial hair, etc.  The build for this game should contain sprite graphics that look human.  I should be able to see my player while changing their look. 
-- The art style will be top down 2-D animation.  There should be animations for users when they perform certain key strokes.  For example, bicycle kick, header, any typical soccer move.  
-- Once the game starts, there will be a coin toss step, where users will pick what side of the field they want to be on and whether or not they want the ball, similar to soccer rules.  After that the game will begin and players will be in their correct starting positions, just to help.  Players will be able to freely move around completely, so they must be smart enough to stay in their position.  Substitutes' characters will be placed on the side of the field if there are any.  One player on the team will be considered "coach" and can call for substitution.  If substitution is called, a screen should pop up that shows which player should come off the field and which player should be entered.  It might be easier to just include all of the players on the field mapped to their position incase players need to switch positions.  The ref on the field will then allow that player to enter the field, like in real soccer. The substitutes will still be able to enter the field at free will be will risk receiving a card like real rules of soccer dictate.  
-- The game should have voice activated chat so that players can freely communicate.  Offer the option to increase or decrease the volume of both teams so that players can hear their team better.  
-- For graphical inspiration, you can look at games like slapshot rebound or netsoccer2.  I would prefer the movement of slapshot remound, but like the lofi quality of netsoccer.  The players should be human, the ball should look like a soccer ball. The soccer field should look like a soccerfield with all of the markings as we will be following all soccer rules according to FIFA rules of the game.  There should also be a center ref and line judges that move with the second last defender to check for offside, like a real referee would do in real life.  
-- In the lobby, players will be given 100 points that can be applied to various traits that will make players behave differently.  Speed, shot strength, aggressiveness, and any other soccer qualities that you might think are good.  There should only be 10 categories total. Users should start with all stats set to 75, and the extra 100 points can be applied however.  The sliders should each from 0 to 100.  These stats should impact things like a player's speed and kick power.  Map the stats to characteristics that can be fealt in the game.  
-- The lobby should be built before allowing me to pick my team/player/stats.  Once I am in a lobby then I can do all the team related things.  I should be able to share my server url with other players to allow them to connect. 
-- The controls should be WASD to move but player direction is determined by how the mouse is oriented relative to that player.  When a player is by the ball, they should be able to left click to 'kick' with their left foot and right click to 'kick' with their right foot.  So you have to spam left/right to dribble with the ball.  Passing/shooting would be done by holding down one of those buttons.  Slide tackling can be done by holding shift while moving near a player.  Slide tackling will knock a player down, dependng on if the wall was hit first, they can receive a card like the rules of soccer dictate.  
-- There should always be 11 v 11.  Any NPC should have ai movement.  The ai should play their position and work with other players to pass the ball.  
-- The game should be full screen.  The score should be located in the upper right corner.  The box displaying the score should look similar to how they do it in world cup, where the team's uniform color matches the background of the team's name listed.  The scores for each team should be in the box next to the team's name.  Substitutes should be placed around a team bench that is located just off the bottom of the field.  The field and gameplay should be left to right.
-- Players should always have the ability to walk around the field using WASD controls.
+## Match Flow
+1. **MainMenu → Host/Join:** Create or connect to TCP lobby
+2. **Lobby:** Select team, position, customize jersey/appearance/stats, add AI players
+3. **CoinToss:** Select field side and ball possession (currently bypassed - starts at center)
+4. **Kickoff:** Ball starts at center, first kick begins play
+5. **FirstHalf:** 45 minutes game time, real-time scaled
+6. **Halftime:** Brief pause, teams switch sides
+7. **SecondHalf:** 45 minutes game time, real-time scaled
+8. **FullTime:** Match ends, show final score
 
-## Helpful links
-- rules of the game: https://digitalhub.fifa.com/m/5371a6dcc42fbb44/original/d6g1medsi8jrrd3e4imp-pdf.pdf
-- tactics https://en.wikipedia.org/wiki/Association_football_tactics
+## Game Description and Requirements (Detailed)
+- You are building a standalone application that should be supported on all major OS's: Windows, Linux, macOS
+- The game is a multiplayer game supporting up to 30 players in a single lobby with P2P hosting model
+- 11v11 soccer with authentic FIFA rules; time scale: 20 real minutes = 90 game minutes
+- Lobby features: password protection, player jersey pixel art editing, position claims, coach designation
+- Player customization: hair style/color, eye color, skin tone, facial hair (visual preview available)
+- Top-down 2D art style with simple player sprites (circle body, circle head, direction indicator)

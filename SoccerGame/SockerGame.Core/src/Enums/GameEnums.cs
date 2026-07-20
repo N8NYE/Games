@@ -32,7 +32,22 @@ namespace SockerGame.Core.Enums
         Away
     }
 
-    public enum MatchEvent
+    public enum KickDirection
+    {
+        Left,
+        Right
+    }
+
+    public enum ConnectionState
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+        InLobby,
+        InGame
+    }
+
+    public enum MatchEventType
     {
         Kickoff,
         Goal,
@@ -47,20 +62,5 @@ namespace SockerGame.Core.Enums
         Substitution,
         HalfTime,
         FullTime
-    }
-
-    public enum KickDirection
-    {
-        Left,
-        Right
-    }
-
-    public enum ConnectionState
-    {
-        Disconnected,
-        Connecting,
-        Connected,
-        InLobby,
-        InGame
     }
 }
